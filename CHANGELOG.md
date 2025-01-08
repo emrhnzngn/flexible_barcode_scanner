@@ -1,3 +1,8 @@
+# 0.0.2
+
+## Basic Edit
+- Editted basic files.
+
 # 0.0.1
 
 ## Added
@@ -14,7 +19,3 @@
 - Camera switching between front and back cameras.
 
 - Basic documentation and examples for easy integration.
-# 0.0.2
-
-## Basic Edit
-- Editted basic files.
