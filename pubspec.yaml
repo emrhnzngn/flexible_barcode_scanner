@@ -1,0 +1,23 @@
+name: flexible_barcode_scanner
+description: "A highly customizable Flutter package for integrating a barcode scanner into your applications."
+version: 0.0.1
+homepage: https://github.com/emrhnzngn/flexible_barcode_scanner
+repository: https://github.com/emrhnzngn/flexible_barcode_scanner
+issue_tracker: https://github.com/emrhnzngn/flexible_barcode_scanner/issues
+
+environment:
+  sdk: ^3.5.3
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mlkit_barcode_scanning: ^0.13.0
+  camera: ^0.10.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
