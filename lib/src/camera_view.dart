@@ -193,22 +193,26 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: _controller?.value.isInitialized == true
-          ? Stack(
-              fit: StackFit.expand,
-              children: [
-                CameraPreview(_controller!),
-                if (widget.customOverlay != null) widget.customOverlay!,
-                _buildBackButton(),
-                _buildFlashToggle(),
-                _buildCameraSwitch(),
-              ],
-            )
-          : Center(
-              child: widget.loadingWidget ?? const CircularProgressIndicator(),
-            ),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: _controller?.value.isInitialized == true
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  CameraPreview(_controller!),
+                  if (widget.customOverlay != null) widget.customOverlay!,
+                  _buildBackButton(),
+                  _buildFlashToggle(),
+                  _buildCameraSwitch(),
+                ],
+              )
+            : Center(
+                child:
+                    widget.loadingWidget ?? const CircularProgressIndicator(),
+              ),
+      ),
     );
   }
 
