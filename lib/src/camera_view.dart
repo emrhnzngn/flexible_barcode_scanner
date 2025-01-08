@@ -64,132 +64,164 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  // List of available camera descriptions.
   static List<CameraDescription> _cameras = [];
+
+  // Camera controller to manage camera operations.
   CameraController? _controller;
+
+  // Index to keep track of the current camera being used.
   int _cameraIndex = -1;
-  bool _isSwitchingCamera = false;
+
+  // Boolean to track the flashlight state (on/off).
   bool _isFlashOn = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCameras();
+    _initialize(); // Initialize the camera setup.
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller?.dispose(); // Dispose of the camera controller.
     super.dispose();
   }
 
-  /// Initializes the camera and selects the appropriate camera lens.
-  Future<void> _initializeCameras() async {
-    _cameras = await availableCameras();
-    _cameraIndex = _cameras.indexWhere(
-        (camera) => camera.lensDirection == widget.initialCameraLensDirection);
-    if (_cameraIndex == -1) _cameraIndex = 0; // Default to the first camera
-    await _startLiveFeed();
+  void _initialize() async {
+    if (_cameras.isEmpty) {
+      _cameras = await availableCameras(); // Fetch available cameras.
+    }
+
+    // Find the camera matching the initial lens direction.
+    for (var i = 0; i < _cameras.length; i++) {
+      if (_cameras[i].lensDirection == widget.initialCameraLensDirection) {
+        _cameraIndex = i;
+        break;
+      }
+    }
+
+    if (_cameraIndex != -1) {
+      _startLiveFeed(); // Start the camera feed if a suitable camera is found.
+    }
   }
 
-  /// Starts the live camera feed and image stream.
-  Future<void> _startLiveFeed() async {
-    if (_cameraIndex == -1 || _cameras.isEmpty) return;
-
+  Future _startLiveFeed() async {
     final camera = _cameras[_cameraIndex];
+
     _controller = CameraController(
       camera,
+      // Use a high resolution preset, as the maximum preset may not work on some devices.
       ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: Platform.isAndroid
           ? ImageFormatGroup.nv21
-          : ImageFormatGroup.bgra8888,
+          : ImageFormatGroup
+              .bgra8888, // Use different formats for Android and iOS.
     );
 
-    await _controller?.initialize();
-    if (!mounted) return;
+    _controller?.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
 
-    await _controller?.startImageStream(_processCameraImage);
-    widget.onCameraFeedReady?.call();
-    widget.onCameraLensDirectionChanged?.call(camera.lensDirection);
+      // Start streaming images from the camera.
+      _controller?.startImageStream(_processCameraImage).then((value) {
+        if (widget.onCameraFeedReady != null) {
+          widget.onCameraFeedReady!();
+        }
+        if (widget.onCameraLensDirectionChanged != null) {
+          widget.onCameraLensDirectionChanged!(camera.lensDirection);
+        }
+      });
 
-    _controller?.setFocusMode(FocusMode.auto);
-    setState(() {});
+      // Set the camera focus mode to auto.
+      _controller?.setFocusMode(FocusMode.auto);
+
+      setState(() {}); // Update the UI after initialization.
+    });
   }
 
-  /// Stops the live camera feed and cleans up resources.
-  Future<void> _stopLiveFeed() async {
-    if (_isSwitchingCamera) return;
-    await _controller?.stopImageStream();
-    await _controller?.dispose();
+  Future _stopLiveFeed() async {
+    await _controller?.stopImageStream(); // Stop the image stream.
+    await _controller?.dispose(); // Dispose of the camera controller.
     _controller = null;
   }
 
-  /// Switches between available cameras.
-  Future<void> _switchCamera() async {
-    if (_isSwitchingCamera) return;
-
-    setState(() => _isSwitchingCamera = true);
-    _cameraIndex = (_cameraIndex + 1) % _cameras.length;
+  Future _switchLiveCamera() async {
+    _cameraIndex = (_cameraIndex + 1) %
+        _cameras.length; // Cycle through available cameras.
     await _stopLiveFeed();
     await _startLiveFeed();
-    setState(() => _isSwitchingCamera = false);
   }
 
-  /// Toggles the flashlight mode.
-  void _toggleFlash() async {
-    _isFlashOn = !_isFlashOn;
-    await _controller
-        ?.setFlashMode(_isFlashOn ? FlashMode.torch : FlashMode.off);
-    setState(() {});
+  Future<void> _toggleFlash() async {
+    _isFlashOn = !_isFlashOn; // Toggle flashlight state.
+    _controller?.setFlashMode(_isFlashOn
+        ? FlashMode.torch
+        : FlashMode.off); // Update flashlight mode.
+    setState(() {}); // Update the UI.
   }
 
-  /// Processes each camera frame and converts it to an [InputImage].
   void _processCameraImage(CameraImage image) {
-    final inputImage = _createInputImage(image);
-    if (inputImage != null) widget.onImage(inputImage);
+    final inputImage =
+        _inputImageFromCameraImage(image); // Convert the image to InputImage.
+    if (inputImage == null) return;
+    widget.onImage(inputImage); // Pass the processed image to the callback.
   }
 
-  /// Converts a [CameraImage] into an [InputImage] format for ML processing.
-  InputImage? _createInputImage(CameraImage image) {
-    if (_controller == null) return null;
-
-    final camera = _cameras[_cameraIndex];
-    final rotation = _getImageRotation(camera.sensorOrientation);
-    if (rotation == null) return null;
-
-    final format = InputImageFormatValue.fromRawValue(image.format.raw);
-    if (format == null || image.planes.isEmpty) return null;
-
-    final plane = image.planes.first;
-    return InputImage.fromBytes(
-      bytes: plane.bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
-      ),
-    );
-  }
-
-  /// Determines the image rotation based on the device and camera orientation.
-  InputImageRotation? _getImageRotation(int sensorOrientation) {
-    final deviceOrientation = _controller?.value.deviceOrientation;
-    if (deviceOrientation == null) return null;
-
-    final rotation = Platform.isIOS
-        ? sensorOrientation
-        : (sensorOrientation - _orientations[deviceOrientation]! + 360) % 360;
-
-    return InputImageRotationValue.fromRawValue(rotation);
-  }
-
-  final Map<DeviceOrientation, int> _orientations = {
+  final _orientations = {
     DeviceOrientation.portraitUp: 0,
     DeviceOrientation.landscapeLeft: 90,
     DeviceOrientation.portraitDown: 180,
     DeviceOrientation.landscapeRight: 270,
   };
+
+  InputImage? _inputImageFromCameraImage(CameraImage image) {
+    if (_controller == null) return null;
+
+    final camera = _cameras[_cameraIndex];
+    final sensorOrientation = camera.sensorOrientation;
+
+    InputImageRotation? rotation;
+
+    if (Platform.isIOS) {
+      rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+    } else if (Platform.isAndroid) {
+      var rotationCompensation =
+          _orientations[_controller!.value.deviceOrientation];
+      if (rotationCompensation == null) return null;
+      if (camera.lensDirection == CameraLensDirection.front) {
+        rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
+      } else {
+        rotationCompensation =
+            (sensorOrientation - rotationCompensation + 360) % 360;
+      }
+      rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
+    }
+
+    if (rotation == null) return null;
+
+    final format = InputImageFormatValue.fromRawValue(image.format.raw);
+
+    if (format == null ||
+        (Platform.isAndroid && format != InputImageFormat.nv21) ||
+        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+
+    if (image.planes.length != 1) return null;
+
+    final plane = image.planes.first;
+
+    return InputImage.fromBytes(
+      bytes: plane.bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation, // Used only in Android.
+        format: format, // Used only in iOS.
+        bytesPerRow: plane.bytesPerRow, // Used only in iOS.
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +233,9 @@ class _CameraViewState extends State<CameraView> {
             ? Stack(
                 fit: StackFit.expand,
                 children: [
-                  CameraPreview(_controller!),
+                  Center(
+                      child: CameraPreview(
+                          _controller!)), // Display the camera preview.
                   if (widget.customOverlay != null) widget.customOverlay!,
                   _buildBackButton(),
                   _buildFlashToggle(),
@@ -209,8 +243,8 @@ class _CameraViewState extends State<CameraView> {
                 ],
               )
             : Center(
-                child:
-                    widget.loadingWidget ?? const CircularProgressIndicator(),
+                child: widget.loadingWidget ??
+                    const CircularProgressIndicator(), // Display loading widget if the camera is not ready.
               ),
       ),
     );
@@ -221,7 +255,7 @@ class _CameraViewState extends State<CameraView> {
         left: 8,
         child: FloatingActionButton(
           heroTag: 'backButton',
-          onPressed: () => Navigator.of(context).pop("-1"),
+          onPressed: () => Navigator.of(context).pop("-1"), // Navigate back.
           backgroundColor: widget.backButtonBackgroundColor ?? Colors.black54,
           child: widget.backButtonIcon ??
               Icon(
@@ -236,7 +270,7 @@ class _CameraViewState extends State<CameraView> {
         left: 8,
         child: FloatingActionButton(
           heroTag: 'flashButton',
-          onPressed: _toggleFlash,
+          onPressed: _toggleFlash, // Toggle the flashlight.
           backgroundColor: widget.flashBackgroundColor ?? Colors.black54,
           child: (_isFlashOn
                   ? widget.openedFlashIcon
@@ -253,7 +287,8 @@ class _CameraViewState extends State<CameraView> {
         right: 8,
         child: FloatingActionButton(
           heroTag: 'switchButton',
-          onPressed: _switchCamera,
+          onPressed:
+              _switchLiveCamera, // Switch between front and back cameras.
           backgroundColor: widget.switchCameraBackgroundColor ?? Colors.black54,
           child: widget.switchCameraButtonIcon ??
               Icon(

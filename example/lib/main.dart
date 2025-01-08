@@ -34,9 +34,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String barcode = "";
 
   void _scanBarcode() async {
-    final resultbarcode = await scanBarcode(
-      context,
-    );
+    final resultbarcode =
+        await scanBarcode(context, backButtonBackgroundColor: Colors.red);
     setState(() {
       if (resultbarcode != "-1") {
         barcode = resultbarcode;
