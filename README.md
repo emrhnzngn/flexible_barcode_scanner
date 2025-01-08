@@ -20,7 +20,7 @@ A highly customizable and efficient barcode scanner library built with Flutter. 
 ***pubspec.yaml***
 ```yaml
 dependencies:
-  flexible_barcode_scanner: ^0.0.1
+  flexible_barcode_scanner: ^0.0.2
 ```
 ## Setup
 

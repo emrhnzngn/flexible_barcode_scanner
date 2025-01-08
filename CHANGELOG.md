@@ -14,3 +14,7 @@
 - Camera switching between front and back cameras.
 
 - Basic documentation and examples for easy integration.
+# 0.0.2
+
+## Basic Edit
+- Editted basic files.
