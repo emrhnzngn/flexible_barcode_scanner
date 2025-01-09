@@ -190,7 +190,9 @@ class _CameraViewState extends State<CameraView> {
     } else if (Platform.isAndroid) {
       var rotationCompensation =
           _orientations[_controller!.value.deviceOrientation];
-      if (rotationCompensation == null) return null;
+      if (rotationCompensation == null) {
+        return null;
+      }
       if (camera.lensDirection == CameraLensDirection.front) {
         rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
       } else {
@@ -200,15 +202,21 @@ class _CameraViewState extends State<CameraView> {
       rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
     }
 
-    if (rotation == null) return null;
+    if (rotation == null) {
+      return null;
+    }
 
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
 
     if (format == null ||
         (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+        (Platform.isIOS && format != InputImageFormat.bgra8888)) {
+      return null;
+    }
 
-    if (image.planes.length != 1) return null;
+    if (image.planes.length != 1) {
+      return null;
+    }
 
     final plane = image.planes.first;
 

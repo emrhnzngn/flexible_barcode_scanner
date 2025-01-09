@@ -1,3 +1,8 @@
+# 0.0.12
+
+## Pub Point
+- Pub point fix
+
 # 0.0.11
 
 ## Barcode Fix
