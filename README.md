@@ -20,7 +20,7 @@ A highly customizable and efficient barcode scanner library built with Flutter. 
 ***pubspec.yaml***
 ```yaml
 dependencies:
-  flexible_barcode_scanner: ^0.0.4
+  flexible_barcode_scanner: ^0.0.11
 ```
 ## Setup
 
@@ -123,4 +123,5 @@ import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
 ## Additional information
 
 - [Google ML Kit Barcode Scanning](https://pub.dev/packages/google_mlkit_barcode_scanning)
+- [Google ML Kit Commons](https://pub.dev/packages/google_mlkit_commons)
 - [Camera](https://pub.dev/packages/camera)

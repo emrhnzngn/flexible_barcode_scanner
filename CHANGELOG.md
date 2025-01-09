@@ -1,11 +1,46 @@
+# 0.0.11
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.10
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.9
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.8
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.7
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.6
+
+## Barcode Fix
+- Bug Fixes.
+
+# 0.0.5
+
+## Barcode Fix
+- Bug Fixes.
+
 # 0.0.4
 
-## Basic Edit
+## Barcode Fix
 - Bug Fixes.
 
 # 0.0.3
 
-## Basic Edit
+## Barcode Fix
 - Bug Fixes.
 
 # 0.0.2
