@@ -4,6 +4,7 @@ A highly customizable and efficient barcode scanner library built with Flutter. 
 
 - **Customizable Camera View**: Modify the camera preview with custom overlays and actions.
 - **Barcode Detection**: Supports various barcode formats using Google ML Kit.
+- **Format Selection**: Scan only specific barcode formats (QR codes, EAN-13, Code 128, etc.) or all formats. Uses built-in `FlexibleBarcodeFormat` enum - no extra imports needed!
 - **Animated Overlay**: Includes a sleek animation for scanning feedback.
 - **Camera Switch**: Easily switch between front and rear cameras.
 - **Flashlight Toggle**: Enable or disable flashlight for better scanning in low light.
@@ -20,7 +21,7 @@ A highly customizable and efficient barcode scanner library built with Flutter. 
 ***pubspec.yaml***
 ```yaml
 dependencies:
-  flexible_barcode_scanner: ^0.0.12
+  flexible_barcode_scanner: ^0.0.13
 ```
 ## Setup
 
@@ -77,43 +78,84 @@ compileSdkVersion: 34
 
 ## Usage
 
+### Basic Usage
+
 ```dart
 import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
 
-    String barcode = "";
-    final resultbarcode = await scanBarcode(
-      context,
-      backButtonIcon: const Icon(
-        Icons.arrow_back,
-        color: Colors.blue,
-      ),
-      loadingWidget: CircularProgressIndicator(
-        color: Colors.green,
-      ),
-      flashButtonIcon: const Icon(
-        Icons.sunny,
-        color: Colors.yellow,
-      ),
-      openedFlashIcon: const Icon(
-        Icons.dark_mode,
-        color: Colors.red,
-      ),
-      switchCameraButtonIcon: const Icon(
-        Icons.camera_alt,
-        color: Colors.orange,
-      ),
-      strokeColor: Colors.purple,
-      lineColor: Colors.pink,
-      backButtonBackgroundColor: Colors.cyanAccent,
-      flashBackgroundColor: Colors.indigo,
-      initialCameraDirection: CameraDirection.back,
-      switchCameraBackgroundColor: Colors.amber,
-    );
-    setState(() {
-      if (resultbarcode != "-1") {
-        barcode = resultbarcode;
-      }
-    });
+String barcode = "";
+final resultbarcode = await scanBarcode(
+  context,
+  backButtonIcon: const Icon(
+    Icons.arrow_back,
+    color: Colors.blue,
+  ),
+  loadingWidget: CircularProgressIndicator(
+    color: Colors.green,
+  ),
+  flashButtonIcon: const Icon(
+    Icons.sunny,
+    color: Colors.yellow,
+  ),
+  openedFlashIcon: const Icon(
+    Icons.dark_mode,
+    color: Colors.red,
+  ),
+  switchCameraButtonIcon: const Icon(
+    Icons.camera_alt,
+    color: Colors.orange,
+  ),
+  strokeColor: Colors.purple,
+  lineColor: Colors.pink,
+  backButtonBackgroundColor: Colors.cyanAccent,
+  flashBackgroundColor: Colors.indigo,
+  initialCameraDirection: CameraDirection.back,
+  switchCameraBackgroundColor: Colors.amber,
+);
+setState(() {
+  if (resultbarcode != "-1") {
+    barcode = resultbarcode;
+  }
+});
+```
+
+### Scanning Only QR Codes
+
+```dart
+import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
+
+final resultbarcode = await scanBarcode(
+  context,
+  barcodeFormats: [FlexibleBarcodeFormat.qrCode],
+);
+```
+
+### Scanning Only Specific Barcode Formats
+
+```dart
+import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
+
+final resultbarcode = await scanBarcode(
+  context,
+  barcodeFormats: [
+    FlexibleBarcodeFormat.ean13,
+    FlexibleBarcodeFormat.code128,
+    FlexibleBarcodeFormat.code39,
+  ],
+);
+```
+
+### Scanning All Formats (Default)
+
+```dart
+import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
+
+final resultbarcode = await scanBarcode(context);
+// or
+final resultbarcode = await scanBarcode(
+  context,
+  barcodeFormats: [FlexibleBarcodeFormat.all],
+);
 ```
 
 ## Supported Platforms

@@ -1,3 +1,25 @@
+# 0.0.13
+
+## New Feature
+- Added `barcodeFormats` parameter to `scanBarcode` function and `BarcodeScannerView` widget
+- Introduced `FlexibleBarcodeFormat` enum - no need to import `google_mlkit_barcode_scanning` package
+- Users can now specify which barcode formats to scan (e.g., only QR codes, only EAN-13, etc.)
+- If `barcodeFormats` is not provided, all formats will be scanned (default behavior)
+
+## Example Usage
+```dart
+import 'package:flexible_barcode_scanner/flexible_barcode_scanner.dart';
+
+// Scan only QR codes
+await scanBarcode(context, barcodeFormats: [FlexibleBarcodeFormat.qrCode]);
+
+// Scan specific formats
+await scanBarcode(context, barcodeFormats: [
+  FlexibleBarcodeFormat.ean13, 
+  FlexibleBarcodeFormat.code128
+]);
+```
+
 # 0.0.12
 
 ## Pub Point

@@ -21,6 +21,7 @@ class BarcodeScannerView extends StatefulWidget {
     this.openedFlashIcon,
     this.switchCameraButtonIcon,
     this.initialCameraDirection = CameraDirection.back,
+    this.barcodeFormats,
   });
 
   /// The color of the scanning line animation.
@@ -68,6 +69,11 @@ class BarcodeScannerView extends StatefulWidget {
   /// The initial camera direction (front or back).
   final CameraDirection initialCameraDirection;
 
+  /// List of barcode formats to scan. If null, all formats will be scanned.
+  /// Example: [FlexibleBarcodeFormat.qrCode] for only QR codes,
+  /// or [FlexibleBarcodeFormat.code128, FlexibleBarcodeFormat.ean13] for specific barcode types.
+  final List<FlexibleBarcodeFormat>? barcodeFormats;
+
   @override
   State<BarcodeScannerView> createState() => _BarcodeScannerViewState();
 }
@@ -91,6 +97,7 @@ Future<String> scanBarcode(
   Widget? openedFlashIcon,
   Widget? switchCameraButtonIcon,
   CameraDirection initialCameraDirection = CameraDirection.back,
+  List<FlexibleBarcodeFormat>? barcodeFormats,
 }) async {
   return await Navigator.of(context).push(
     MaterialPageRoute(
@@ -112,13 +119,16 @@ Future<String> scanBarcode(
         openedFlashIcon: openedFlashIcon,
         switchCameraButtonIcon: switchCameraButtonIcon,
         initialCameraDirection: initialCameraDirection,
+        barcodeFormats: barcodeFormats,
       ),
     ),
   );
 }
 
 class _BarcodeScannerViewState extends State<BarcodeScannerView> {
-  final BarcodeScanner _barcodeScanner = BarcodeScanner();
+  late final BarcodeScanner _barcodeScanner = BarcodeScanner(
+    formats: toMlKitFormats(widget.barcodeFormats),
+  );
   bool _isProcessing = false;
   bool _hasReturnedValue = false;
 

@@ -4,3 +4,4 @@ library flexible_barcode_scanner;
 export 'src/camera_view.dart'; // Handles the live camera feed.
 export 'src/barcode_scanner_view.dart'; // Integrates barcode scanning logic.
 export 'src/overlay_painter.dart'; // Customizable overlay for the scanner.
+export 'src/barcode_format.dart'; // Barcode format enum and utilities.
